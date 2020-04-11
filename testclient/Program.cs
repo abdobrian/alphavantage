@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -21,55 +22,82 @@ namespace testclient
 
         static async Task APICall()
         {
-            //    client.DefaultRequestHeaders.Accept.Clear();
-            //    client.DefaultRequestHeaders.Accept.Add(
-            //        new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
-            //    client.DefaultRequestHeaders.Add("User-Agent", ".NET Foundation Repository Reporter");
 
             //Find the average volume of MSFT in the past 7 days
-            var stringTask = client.GetStringAsync("https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=MSFT&apikey=NIWJI7M0ZZM7YOBA&datatype=csv");
+            var averageVolume = await GetAverageVolume("MSFT", 7);
+            Console.WriteLine("Average Volume for MSFT in the past 7 days " + averageVolume);
+
+            //Find the highest closing price of AAPL in the past 6 months
+            var closingPrice = await GetHighestClosingPrice("AAPL", 6);
+            Console.WriteLine("Highest Closing Price for AAPL in the past 6 months " + closingPrice);
+           
+            //Find the difference between open and close price for BA for every day in the last month
+            var dict = await (GetDifferenceBetweenOpenAndClose("BA", 1));
+
+            Console.WriteLine("the difference between open and close price for BA for every day in the last month");
+
+            foreach (var day in dict)
+            {
+                Console.WriteLine(string.Format("{0} {1}", day.Key.ToString("MMMM-dd-yyyy"), day.Value));
+
+            }
+            //Given a list of stock symbols, find the symbol with the largest return over the past month
+            //This needs to be run by itself as the api has a limit on the number of calls that can be run in a minute.
+            var stockRet = await GetLargestStockReturn(new List<string> { "IBM", "BA", "AAPL" });
+            Console.WriteLine("The symbol with the largest return is " + stockRet.Item1 + " with " + stockRet.Item2);
+
+
+        }
+        public static async Task<decimal> GetAverageVolume(string symbol, int range)
+        {
+            var stringTask = client.GetStringAsync($"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&apikey=NIWJI7M0ZZM7YOBA&datatype=csv");
             var json = await stringTask;// JsonConvert.DeserializeObject<dynamic>(stringTask);
-            var outputList = json.FromCsv <List<QueryModel>>();
-           // var dailyList = test["Time Series (Daily)"];
+            var outputList = json.FromCsv<List<QueryModel>>();
+            // var dailyList = test["Time Series (Daily)"];
             decimal volumeTotal = 0;
             foreach (var daily in outputList)
             {
-               
-                        var currentDate = DateTime.Now;
-                if (daily.TimeStamp < DateTime.Now.AddDays(-7))
+
+                var currentDate = DateTime.Now;
+                if (daily.TimeStamp < DateTime.Now.AddDays(-range))
                     break;
 
-                        volumeTotal += (daily.Volume);
-                    
-                
-            }
-            var averageVolume = volumeTotal / 7;
-            Console.Write(averageVolume);
+                volumeTotal += (daily.Volume);
 
-            //Find the highest closing price of AAPL in the past 6 months
-            stringTask = client.GetStringAsync("https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=AAPL&apikey=NIWJI7M0ZZM7YOBA&datatype=csv");
-            json = await stringTask;// JsonConvert.DeserializeObject<dynamic>(stringTask);
-            outputList = json.FromCsv<List<QueryModel>>();
+
+            }
+            var averageVolume = volumeTotal / range;
+            return averageVolume;
+
+        }
+        public static async Task<decimal> GetHighestClosingPrice(string symbol, int range)
+        {
+           var stringTask = client.GetStringAsync($"https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol={symbol}&apikey=NIWJI7M0ZZM7YOBA&datatype=csv");
+            var json = await stringTask;// JsonConvert.DeserializeObject<dynamic>(stringTask);
+            var outputList = json.FromCsv<List<QueryModel>>();
             // var dailyList = test["Time Series (Daily)"];
             decimal closingPrice = 0;
-            foreach (var montly in outputList)
+            foreach (var monthly in outputList)
             {
 
                 var currentDate = DateTime.Now;
-                if (montly.TimeStamp < DateTime.Now.AddMonths(-6))
+                if (monthly.TimeStamp < DateTime.Now.AddMonths(-range))
                     break;
 
-                if (montly.Close > closingPrice)
-                    closingPrice = montly.Close;
+                if (monthly.Close > closingPrice)
+                    closingPrice = monthly.Close;
 
 
 
             }
-            Console.Write(closingPrice);
-            //Find the difference between open and close price for BA for every day in the last month
-            stringTask = client.GetStringAsync("https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=BA&apikey=NIWJI7M0ZZM7YOBA&datatype=csv");
-            json = await stringTask;// JsonConvert.DeserializeObject<dynamic>(stringTask);
-            outputList = json.FromCsv<List<QueryModel>>();
+
+            return closingPrice;
+        }
+         public static async Task<Dictionary<DateTime, decimal>> GetDifferenceBetweenOpenAndClose(string symbol, int range)
+        {
+           var stringTask = client.GetStringAsync($"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&apikey=NIWJI7M0ZZM7YOBA&datatype=csv");
+           var  json = await stringTask;// JsonConvert.DeserializeObject<dynamic>(stringTask);
+           var  outputList = json.FromCsv<List<QueryModel>>();
             // var dailyList = test["Time Series (Daily)"];
             var dict = new Dictionary<DateTime, decimal>();
 
@@ -77,26 +105,43 @@ namespace testclient
             {
 
                 var currentDate = DateTime.Now;
-                if (daily.TimeStamp < DateTime.Now.AddMonths(-1))
+                if (daily.TimeStamp < DateTime.Now.AddMonths(-range))
                     break;
 
                 dict.Add(daily.TimeStamp, Math.Abs(daily.Open - daily.Close));
 
             }
-            foreach (var day in dict)
+
+            return dict;
+        }
+         public static async Task<Tuple<string, decimal>> GetLargestStockReturn(List<string> stocks)
+        {
+            Tuple<string, decimal> largestStockReturn = null;
+
+            foreach (var stock in stocks)
             {
-                Console.Write(string.Format("{0} {1}", day.Key, day.Value));
-
+                var output = await GetStockReturn(stock);
+                if (largestStockReturn == null)
+                    largestStockReturn = output;
+                else {
+                    if (largestStockReturn.Item2 < output.Item2)
+                        largestStockReturn = output;
+                }
             }
-            //Given a list of stock symbols, find the symbol with the largest return over the past month
-            //return = (p1 - p0) + D / p0
-            stringTask = client.GetStringAsync("https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=MSFT&apikey=NIWJI7M0ZZM7YOBA");
+            return largestStockReturn;
 
+        }
+          public static async Task<Tuple<string, decimal>> GetStockReturn(string symbol)
+        {
+            var stringTask = client.GetStringAsync($"https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol={symbol}&apikey=NIWJI7M0ZZM7YOBA&datatype=csv");
+            var json = await stringTask;// JsonConvert.DeserializeObject<dynamic>(stringTask);
+            var outputList = json.FromCsv<List<QueryModel>>(); 
 
-            var msg = await stringTask;
-            Console.Write(msg);
-
-
+            var close = outputList.First().Close;
+            var lastMonth = DateTime.Now.AddMonths(-1);
+            var open = outputList.First(t => t.TimeStamp.Month == lastMonth.Month && t.TimeStamp.Year == lastMonth.Year).Open;
+  
+            return new Tuple<string, decimal>(symbol, close-open);
         }
     }
 }

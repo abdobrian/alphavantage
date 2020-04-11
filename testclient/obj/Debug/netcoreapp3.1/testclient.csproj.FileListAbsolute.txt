@@ -4,13 +4,12 @@ C:\Users\fleenyworks\source\repos\testclient\testclient\bin\Debug\netcoreapp3.1\
 C:\Users\fleenyworks\source\repos\testclient\testclient\bin\Debug\netcoreapp3.1\testclient.runtimeconfig.dev.json
 C:\Users\fleenyworks\source\repos\testclient\testclient\bin\Debug\netcoreapp3.1\testclient.dll
 C:\Users\fleenyworks\source\repos\testclient\testclient\bin\Debug\netcoreapp3.1\testclient.pdb
-C:\Users\fleenyworks\source\repos\testclient\testclient\obj\Debug\netcoreapp3.1\testclient.csprojAssemblyReference.cache
+C:\Users\fleenyworks\source\repos\testclient\testclient\bin\Debug\netcoreapp3.1\Newtonsoft.Json.dll
+C:\Users\fleenyworks\source\repos\testclient\testclient\bin\Debug\netcoreapp3.1\ServiceStack.Text.dll
+C:\Users\fleenyworks\source\repos\testclient\testclient\obj\Debug\netcoreapp3.1\testclient.csproj.CoreCompileInputs.cache
 C:\Users\fleenyworks\source\repos\testclient\testclient\obj\Debug\netcoreapp3.1\testclient.AssemblyInfoInputs.cache
 C:\Users\fleenyworks\source\repos\testclient\testclient\obj\Debug\netcoreapp3.1\testclient.AssemblyInfo.cs
+C:\Users\fleenyworks\source\repos\testclient\testclient\obj\Debug\netcoreapp3.1\testclient.csproj.CopyComplete
 C:\Users\fleenyworks\source\repos\testclient\testclient\obj\Debug\netcoreapp3.1\testclient.dll
 C:\Users\fleenyworks\source\repos\testclient\testclient\obj\Debug\netcoreapp3.1\testclient.pdb
 C:\Users\fleenyworks\source\repos\testclient\testclient\obj\Debug\netcoreapp3.1\testclient.genruntimeconfig.cache
-C:\Users\fleenyworks\source\repos\testclient\testclient\bin\Debug\netcoreapp3.1\Newtonsoft.Json.dll
-C:\Users\fleenyworks\source\repos\testclient\testclient\obj\Debug\netcoreapp3.1\testclient.csproj.CopyComplete
-C:\Users\fleenyworks\source\repos\testclient\testclient\bin\Debug\netcoreapp3.1\ServiceStack.Text.dll
-C:\Users\fleenyworks\source\repos\testclient\testclient\obj\Debug\netcoreapp3.1\testclient.csproj.CoreCompileInputs.cache
